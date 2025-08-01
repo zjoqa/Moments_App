@@ -1,21 +1,31 @@
 import {
     View,
-    Text,
     ImageBackground,
     Pressable,
     ActivityIndicator,
 } from "react-native";
+import CustomText from "@/CustomText";
 import { StyleSheet } from "react-native";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import LoginModal from "../components/LoginModal";
-import RegisterModal from "../components/RegisterModal";
-import { auth } from "../firebase"; // Firebase 인증 모듈 import
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { ModalContext } from "./context/ModalContext";
+import { CalendarContext } from "./context/CalenderContext";
+
+import LoginModal from "./components/LoginModal";
+import RegisterModal from "./components/RegisterModal";
+import MakingDiaryModal from "./components/MakingDiaryModal";
 
 export default function StartPage() {
     const [loginModalVisible, setLoginModalVisible] = useState(false);
     const [registerModalVisible, setRegisterModalVisible] = useState(false);
+    const [makingDiaryModalVisible, setMakingDiaryModalVisible] =
+        useState(false);
+
+    const [travelStartDate, setTravelStartDate] = useState("");
+    const [travelEndDate, setTravelEndDate] = useState("");
+
     const [isLoading, setIsLoading] = useState(true);
 
     const router = useRouter();
@@ -26,6 +36,16 @@ export default function StartPage() {
 
     const registerHandler = () => {
         setRegisterModalVisible(true);
+    };
+
+    const clearStorage = () => {
+        AsyncStorage.clear()
+            .then(() => {
+                console.log("스토리지 클리어 완료");
+            })
+            .catch((error) => {
+                console.error("스토리지 클리어 중 에러 발생:", error);
+            });
     };
 
     useEffect(() => {
@@ -53,65 +73,96 @@ export default function StartPage() {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#E17055" />
-                <Text style={styles.loadingText}>인증 상태 확인 중...</Text>
+                <CustomText style={styles.loadingText}>
+                    인증 상태 확인 중...
+                </CustomText>
             </View>
         );
     }
 
     return (
-        <ImageBackground
-            style={styles.container}
-            source={require("../assets/images/startPageImage.jpg")}
+        <ModalContext.Provider
+            value={{
+                loginModalVisible,
+                registerModalVisible,
+                makingDiaryModalVisible,
+                setLoginModalVisible,
+                setRegisterModalVisible,
+                setMakingDiaryModalVisible,
+            }}
         >
-            <View style={styles.textContainer}>
-                <Text style={styles.text}>
-                    스쳐가는 순간들을 놓치지 마세요.
-                    {"\n"}기억은 이곳에 남아요
-                </Text>
-            </View>
-            <View>
-                <View style={styles.buttonContainer}>
-                    <Pressable onPress={loginHandler} style={styles.button}>
-                        <Text style={styles.buttonText}>로그인</Text>
-                    </Pressable>
-                    <Pressable
-                        onPress={registerHandler}
-                        style={[styles.button, { backgroundColor: "#FEFEFE" }]}
-                    >
-                        <Text style={[styles.buttonText, { color: "#E17055" }]}>
-                            회원가입
-                        </Text>
-                    </Pressable>
-                </View>
-                <View>
-                    <Pressable>
-                        <Text
-                            style={[
-                                styles.buttonText,
-                                {
-                                    fontSize: 14,
-                                    fontWeight: "400",
-                                    color: "#F3F5F7",
-                                    marginTop: 16,
-                                },
-                            ]}
-                        >
-                            게스트로 이용하기
-                        </Text>
-                    </Pressable>
-                </View>
-            </View>
-            <LoginModal
-                isVisible={loginModalVisible}
-                onClose={() => setLoginModalVisible(false)}
-                // authInstance prop 제거 (export된 auth 사용)
-            />
-            <RegisterModal
-                isVisible={registerModalVisible}
-                onClose={() => setRegisterModalVisible(false)}
-                // authInstance prop 제거 (export된 auth 사용)
-            />
-        </ImageBackground>
+            <CalendarContext.Provider
+                value={{
+                    travelStartDate,
+                    setTravelStartDate,
+                    travelEndDate,
+                    setTravelEndDate,
+                }}
+            >
+                <ImageBackground
+                    style={styles.container}
+                    source={require("../assets/images/startPageImage.jpg")}
+                >
+                    <View style={styles.textContainer}>
+                        <CustomText style={styles.text}>
+                            스쳐가는 순간들을 놓치지 마세요.
+                            {"\n"}기억은 이곳에 남아요
+                        </CustomText>
+                    </View>
+                    <View>
+                        <View style={styles.buttonContainer}>
+                            <Pressable
+                                onPress={loginHandler}
+                                style={styles.button}
+                            >
+                                <CustomText style={styles.buttonText}>
+                                    로그인
+                                </CustomText>
+                            </Pressable>
+                            <Pressable
+                                onPress={registerHandler}
+                                style={[
+                                    styles.button,
+                                    { backgroundColor: "#FEFEFE" },
+                                ]}
+                            >
+                                <CustomText
+                                    style={[
+                                        styles.buttonText,
+                                        { color: "#E17055" },
+                                    ]}
+                                >
+                                    회원가입
+                                </CustomText>
+                            </Pressable>
+                        </View>
+                        <View>
+                            <Pressable>
+                                <CustomText
+                                    style={[
+                                        styles.buttonText,
+                                        {
+                                            fontSize: 14,
+                                            fontWeight: "400",
+                                            color: "#F3F5F7",
+                                            marginTop: 16,
+                                        },
+                                    ]}
+                                >
+                                    게스트로 이용하기
+                                </CustomText>
+                            </Pressable>
+                        </View>
+                    </View>
+
+                    <MakingDiaryModal />
+                    <LoginModal />
+                    <RegisterModal
+                        onClose={() => setRegisterModalVisible(false)}
+                    />
+                </ImageBackground>
+            </CalendarContext.Provider>
+        </ModalContext.Provider>
     );
 }
 
@@ -149,6 +200,14 @@ const styles = StyleSheet.create({
         backgroundColor: "#E17055",
         width: 256,
         height: 56,
+        borderRadius: 100,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    testbutton: {
+        backgroundColor: "#E17055",
+        width: 100,
+        height: 26,
         borderRadius: 100,
         alignItems: "center",
         justifyContent: "center",

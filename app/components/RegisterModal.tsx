@@ -1,15 +1,15 @@
-import { View, Text, Pressable, TextInput, StyleSheet } from "react-native";
+import { View, Pressable, TextInput, StyleSheet } from "react-native";
 import Modal from "react-native-modal";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useRouter } from "expo-router";
-import { auth } from "../firebase"; // Firebase 인증 모듈 import
+import { auth } from "../../firebase"; // Firebase 인증 모듈 import
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { ModalContext } from "../context/ModalContext";
+import CustomText from "@/CustomText";
 
 interface RegisterModalProps {
-    isVisible: boolean;
     onClose: () => void;
-    // authInstance?: any; ← 이 props 제거
 }
 
 // 에러 메시지 상수 분리
@@ -25,17 +25,19 @@ const ERROR_MESSAGES = {
     UNKNOWN_ERROR: "알 수 없는 오류가 발생했습니다.",
 };
 
-export default function RegisterModal({
-    isVisible,
-    onClose,
-}: RegisterModalProps) {
+export default function RegisterModal({ onClose }: RegisterModalProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [username, setUsername] = useState("");
     const [error, setError] = useState("");
-
     const router = useRouter();
+
+    const modalContext = useContext(ModalContext);
+    if (!modalContext) {
+        throw new Error("ModalContext가 제공되지 않았습니다.");
+    }
+    const { registerModalVisible } = modalContext;
 
     // Firebase 에러 코드를 한국어 메시지로 변환하는 함수
     const getErrorMessage = (errorCode: string) => {
@@ -118,7 +120,7 @@ export default function RegisterModal({
 
     return (
         <Modal
-            isVisible={isVisible}
+            isVisible={registerModalVisible}
             backdropColor="black"
             backdropOpacity={0.25}
             animationIn="fadeIn"
@@ -131,7 +133,7 @@ export default function RegisterModal({
                 </Pressable>
                 <View style={styles.modalContent}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>회원가입</Text>
+                        <CustomText style={styles.title}>회원가입</CustomText>
                     </View>
 
                     <View style={styles.formContainer}>
@@ -183,11 +185,15 @@ export default function RegisterModal({
                             onPress={handleRegister}
                             style={styles.loginButton}
                         >
-                            <Text style={styles.loginButtonText}>회원가입</Text>
+                            <CustomText style={styles.loginButtonText}>
+                                회원가입
+                            </CustomText>
                         </Pressable>
                         {error && (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>{error}</Text>
+                                <CustomText style={styles.errorText}>
+                                    {error}
+                                </CustomText>
                             </View>
                         )}
                     </View>

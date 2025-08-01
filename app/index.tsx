@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import CustomText from "@/CustomText";
 
 export default function MainPage() {
     const router = useRouter();
@@ -23,7 +24,7 @@ export default function MainPage() {
         <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-            <Text>Loading...</Text>
+            <CustomText>Loading...</CustomText>
         </View>
     );
 }

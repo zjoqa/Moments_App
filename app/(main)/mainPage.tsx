@@ -11,7 +11,7 @@ export default function MainPage() {
         try {
             await auth.signOut();
             await AsyncStorage.removeItem("user"); // 로그아웃 시 사용자 정보 삭제
-            router.replace("/loginPage"); // 로그인 페이지로 이동
+            router.replace("/loginPage"); // 로그인 페이지로 이동ㅌ
         } catch (error) {
             console.log("로그아웃 에러:", error);
         }

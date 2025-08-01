@@ -1,19 +1,14 @@
-import {
-    View,
-    Text,
-    Pressable,
-    TextInput,
-    StyleSheet,
-    Image,
-} from "react-native";
+import { View, Pressable, TextInput, StyleSheet, Image } from "react-native";
+import CustomText from "@/CustomText";
 import Modal from "react-native-modal";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase"; // Firebase 인증 모듈 import
+import { auth, db } from "../../firebase"; // Firebase 인증 모듈 import
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import MakingDiaryModal from "./MakingDiaryModal";
+import { ModalContext } from "../context/ModalContext"; // ModalContext import
+import { collection, getDocs } from "firebase/firestore";
 
 // 로그인용 에러 메시지 상수
 const ERROR_MESSAGES = {
@@ -29,18 +24,24 @@ const ERROR_MESSAGES = {
     UNKNOWN_ERROR: "알 수 없는 오류가 발생했습니다.",
 };
 
-interface LoginModalProps {
-    isVisible: boolean;
-    onClose: () => void;
-}
-
-export default function LoginModal({ isVisible, onClose }: LoginModalProps) {
+export default function LoginModal() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const [makingDiaryModalVisible, setMakingDiaryModalVisible] =
-        useState(false);
+    const onClose = () => {
+        setLoginModalVisible(false);
+    };
+
+    const modalContext = useContext(ModalContext);
+    if (!modalContext) {
+        throw new Error("ModalContext가 제공되지 않았습니다.");
+    }
+    const {
+        loginModalVisible,
+        setLoginModalVisible,
+        setMakingDiaryModalVisible,
+    } = modalContext;
 
     // Firebase 로그인 에러 코드를 한국어 메시지로 변환하는 함수
     const getErrorMessage = (errorCode: string) => {
@@ -94,23 +95,22 @@ export default function LoginModal({ isVisible, onClose }: LoginModalProps) {
             return;
         }
 
-        signInWithEmailAndPassword(auth, email, password) // export된 auth 사용
+        signInWithEmailAndPassword(auth, email, password)
             .then(async (userCredential) => {
                 const user = userCredential.user;
-                if ((await AsyncStorage.getItem("diary")) === null) {
-                    await AsyncStorage.setItem("user", JSON.stringify(user)); // 로그인 성공 시 사용자 정보 저장
-                    setMakingDiaryModalVisible(true); // 다이어리 작성 모달 열기
-                    {
-                        <MakingDiaryModal
-                            isVisible={makingDiaryModalVisible}
-                            onClose={() => setMakingDiaryModalVisible(false)}
-                        />;
-                    }
-                    onClose(); // 모달만 닫기
+                await AsyncStorage.setItem("user", JSON.stringify(user));
+
+                const myTravel = await getDocs(collection(db, "travels"));
+
+                if (myTravel.empty) {
+                    setLoginModalVisible(false); // 로그인 모달 닫기
+                    setTimeout(() => {
+                        setMakingDiaryModalVisible(true); // 다이어리 생성 모달 열기
+                    }, 550); // 상태 변경 간 딜레이 추가
                 } else {
-                    router.replace("/(main)/mainPage"); // 로그인 성공 시 메인 페이지로 이동
-                    await AsyncStorage.setItem("user", JSON.stringify(user)); // 로그인 성공 시 사용자 정보 저장
-                    onClose(); // 모달만 닫기
+                    console.log("다이어리 있음, 메인 페이지로 이동");
+                    router.replace("/(main)/mainPage");
+                    setLoginModalVisible(false); // 로그인 모달 닫기
                 }
             })
             .catch((error) => {
@@ -126,11 +126,12 @@ export default function LoginModal({ isVisible, onClose }: LoginModalProps) {
 
     return (
         <Modal
-            isVisible={isVisible}
+            isVisible={loginModalVisible}
             backdropColor="black"
             backdropOpacity={0.25}
             animationIn="fadeIn"
             animationOut="fadeOut"
+            useNativeDriver={true} // 애니메이션 문제 방지
             onBackdropPress={onClose}
         >
             <View style={styles.modal}>
@@ -139,7 +140,7 @@ export default function LoginModal({ isVisible, onClose }: LoginModalProps) {
                 </Pressable>
                 <View style={styles.modalContent}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>로그인</Text>
+                        <CustomText style={styles.title}>로그인</CustomText>
                     </View>
 
                     <View style={styles.formContainer}>
@@ -171,15 +172,17 @@ export default function LoginModal({ isVisible, onClose }: LoginModalProps) {
                             onPress={findPasswordHandler}
                             style={styles.findPasswordButton}
                         >
-                            <Text style={styles.findPasswordText}>
+                            <CustomText style={styles.findPasswordText}>
                                 비밀번호 찾기
-                            </Text>
+                            </CustomText>
                         </Pressable>
 
                         {/* 에러 메시지 - 로그인 버튼 바로 위에 */}
                         {error && (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>{error}</Text>
+                                <CustomText style={styles.errorText}>
+                                    {error}
+                                </CustomText>
                             </View>
                         )}
 
@@ -187,10 +190,12 @@ export default function LoginModal({ isVisible, onClose }: LoginModalProps) {
                             onPress={handleLogin}
                             style={styles.loginButton}
                         >
-                            <Text style={styles.loginButtonText}>로그인</Text>
+                            <CustomText style={styles.loginButtonText}>
+                                로그인
+                            </CustomText>
                         </Pressable>
 
-                        <Text style={styles.orText}>or</Text>
+                        <CustomText style={styles.orText}>or</CustomText>
 
                         <View style={styles.socialIconContainer}>
                             <Pressable style={styles.socialButton}>
@@ -242,10 +247,10 @@ const styles = StyleSheet.create({
         left: 24,
     },
     title: {
+        fontWeight: "700",
         fontSize: 32,
         lineHeight: 48,
         letterSpacing: -1.44,
-        fontWeight: "700",
         textAlign: "left",
         color: "#E17055",
     },
