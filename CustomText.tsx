@@ -7,7 +7,7 @@ interface CustomTextProps extends TextProps {}
 const CustomText: React.FC<CustomTextProps> = ({ style, ...rest }) => {
     const customStyle = {
         fontFamily: "Pretendard-Regular",
-        color: "red",
+        color: "#111111",
     };
 
     return <RNText style={[customStyle, style]} {...rest} />;

@@ -99,19 +99,7 @@ export default function LoginModal() {
             .then(async (userCredential) => {
                 const user = userCredential.user;
                 await AsyncStorage.setItem("user", JSON.stringify(user));
-
-                const myTravel = await getDocs(collection(db, "travels"));
-
-                if (myTravel.empty) {
-                    setLoginModalVisible(false); // 로그인 모달 닫기
-                    setTimeout(() => {
-                        setMakingDiaryModalVisible(true); // 다이어리 생성 모달 열기
-                    }, 550); // 상태 변경 간 딜레이 추가
-                } else {
-                    console.log("다이어리 있음, 메인 페이지로 이동");
-                    router.replace("/(main)/mainPage");
-                    setLoginModalVisible(false); // 로그인 모달 닫기
-                }
+                router.replace("/(main)/mainPage");
             })
             .catch((error) => {
                 const errorMessage = getErrorMessage(error.code);
@@ -136,7 +124,7 @@ export default function LoginModal() {
         >
             <View style={styles.modal}>
                 <Pressable onPress={onClose} style={styles.closeButton}>
-                    <Ionicons name="close" size={24} color="#E17055" />
+                    <Ionicons name="close" size={24} color="#34495E" />
                 </Pressable>
                 <View style={styles.modalContent}>
                     <View style={styles.header}>
@@ -252,7 +240,7 @@ const styles = StyleSheet.create({
         lineHeight: 48,
         letterSpacing: -1.44,
         textAlign: "left",
-        color: "#E17055",
+        color: "#34495E",
     },
     formContainer: {
         justifyContent: "center",
@@ -274,7 +262,7 @@ const styles = StyleSheet.create({
         marginTop: -8,
     },
     findPasswordText: {
-        color: "#E17055",
+        color: "#34495E",
         fontSize: 14,
     },
     errorContainer: {
@@ -289,7 +277,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     loginButton: {
-        backgroundColor: "#E17055",
+        backgroundColor: "#34495E",
         borderRadius: 100,
         width: 300,
         height: 65,

@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "expo-router";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD8VZHrkla7RvZ5ZrtbXx6r1N2KQOozUcQ",
@@ -16,6 +18,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+const router = useRouter();
 
 // Firebase 서비스들을 export
 export { auth, db, storage };

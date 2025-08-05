@@ -1,5 +1,6 @@
 {
     "expo": {
+        "jsEngine": "jsc",
         "name": "my-app",
         "slug": "my-app",
         "version": "1.0.0",
@@ -13,17 +14,19 @@
             "googleServicesFile": "./GoogleService-Info.plist",
             "bundleIdentifier": "moments.com",
             "infoPlist": {
-                "ITSAppUsesNonExemptEncryption": false
+                "ITSAppUsesNonExemptEncryption": false,
+                "NSLocationWhenInUseUsageDescription": "This app requires access to your location to provide location-based features."
             }
         },
         "android": {
+            "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
             "googleServicesFile": "./GoogleService-Info.plist",
-            "bundleIdentifier": "moments.com",
             "adaptiveIcon": {
                 "foregroundImage": "./assets/images/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "edgeToEdgeEnabled": true
+            "edgeToEdgeEnabled": true,
+            "package": "moments.com"
         },
         "web": {
             "bundler": "metro",
@@ -41,7 +44,19 @@
                     "backgroundColor": "#ffffff"
                 }
             ],
-            "expo-font"
+            "expo-font",
+            [
+                "expo-location",
+                {
+                    "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+                }
+            ],
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "The app accesses your photos to let you share them with your friends."
+                }
+            ]
         ],
         "experiments": {
             "typedRoutes": true

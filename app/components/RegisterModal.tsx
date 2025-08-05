@@ -129,7 +129,7 @@ export default function RegisterModal({ onClose }: RegisterModalProps) {
         >
             <View style={styles.modal}>
                 <Pressable onPress={onClose} style={styles.closeButton}>
-                    <Ionicons name="close" size={24} color="#E17055" />
+                    <Ionicons name="close" size={24} color="#34495E" />
                 </Pressable>
                 <View style={styles.modalContent}>
                     <View style={styles.header}>
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         letterSpacing: -1.44,
         fontWeight: "700",
         textAlign: "left",
-        color: "#E17055",
+        color: "#34495E",
     },
     formContainer: {
         justifyContent: "center",
@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
         height: 65,
         fontSize: 16,
         paddingLeft: 24,
+        borderWidth: StyleSheet.hairlineWidth,
         textAlign: "left",
         backgroundColor: "#fff",
     },
@@ -254,11 +255,11 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     findPasswordText: {
-        color: "#E17055",
+        color: "#34495E",
         fontSize: 14,
     },
     loginButton: {
-        backgroundColor: "#E17055",
+        backgroundColor: "#34495E",
         borderRadius: 100,
         width: 300,
         height: 65,

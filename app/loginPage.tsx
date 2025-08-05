@@ -26,8 +26,6 @@ export default function StartPage() {
     const [travelStartDate, setTravelStartDate] = useState("");
     const [travelEndDate, setTravelEndDate] = useState("");
 
-    const [isLoading, setIsLoading] = useState(true);
-
     const router = useRouter();
 
     const loginHandler = () => {
@@ -47,38 +45,6 @@ export default function StartPage() {
                 console.error("스토리지 클리어 중 에러 발생:", error);
             });
     };
-
-    useEffect(() => {
-        const cheackAuthStatus = async () => {
-            try {
-                const user = await AsyncStorage.getItem("user");
-                if (user) {
-                    // 사용자가 로그인 상태인 경우 메인 페이지로 이동
-                    router.replace("/(main)/mainPage");
-                    setIsLoading(false);
-                } else {
-                    // 사용자가 로그인하지 않은 경우 로딩 완료
-                    setIsLoading(false);
-                }
-            } catch (error) {
-                console.error("인증 상태 확인 중 에러 발생:", error);
-                setIsLoading(false);
-            }
-        };
-        cheackAuthStatus();
-    }, []);
-
-    // 로딩 중일 때 로딩 화면 표시
-    if (isLoading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#E17055" />
-                <CustomText style={styles.loadingText}>
-                    인증 상태 확인 중...
-                </CustomText>
-            </View>
-        );
-    }
 
     return (
         <ModalContext.Provider
@@ -108,19 +74,14 @@ export default function StartPage() {
                             스쳐가는 순간들을 놓치지 마세요.
                             {"\n"}기억은 이곳에 남아요
                         </CustomText>
+                        <Pressable onPress={clearStorage}>
+                            <CustomText>스토리지 클리어</CustomText>
+                        </Pressable>
                     </View>
                     <View>
                         <View style={styles.buttonContainer}>
                             <Pressable
                                 onPress={loginHandler}
-                                style={styles.button}
-                            >
-                                <CustomText style={styles.buttonText}>
-                                    로그인
-                                </CustomText>
-                            </Pressable>
-                            <Pressable
-                                onPress={registerHandler}
                                 style={[
                                     styles.button,
                                     { backgroundColor: "#FEFEFE" },
@@ -129,9 +90,17 @@ export default function StartPage() {
                                 <CustomText
                                     style={[
                                         styles.buttonText,
-                                        { color: "#E17055" },
+                                        { color: "#34495E" },
                                     ]}
                                 >
+                                    로그인
+                                </CustomText>
+                            </Pressable>
+                            <Pressable
+                                onPress={registerHandler}
+                                style={styles.button}
+                            >
+                                <CustomText style={styles.buttonText}>
                                     회원가입
                                 </CustomText>
                             </Pressable>
@@ -197,7 +166,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     button: {
-        backgroundColor: "#E17055",
+        backgroundColor: "#34495E",
         width: 256,
         height: 56,
         borderRadius: 100,
@@ -205,7 +174,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     testbutton: {
-        backgroundColor: "#E17055",
+        backgroundColor: "#34495E",
         width: 100,
         height: 26,
         borderRadius: 100,
@@ -229,7 +198,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 16,
         fontSize: 16,
-        color: "#E17055",
+        color: "#34495E",
         fontWeight: "500",
     },
     modalContent: {
